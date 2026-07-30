@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Chess AI Review",
+  "version": "1.0.0",
+  "description": "Production-ready Chess AI Review Extension",
+  "permissions": ["sidePanel", "activeTab", "storage"],
+  "host_permissions": ["https://*.chess.com/*"],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.chess.com/*"],
+      "js": ["assets/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
