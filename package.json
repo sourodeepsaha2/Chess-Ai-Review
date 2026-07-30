@@ -1,0 +1,27 @@
+{
+  "name": "chess-ai-review",
+  "version": "1.0.0",
+  "description": "Production-ready Chess AI Review monorepo containing an extension and a server.",
+  "private": true,
+  "workspaces": [
+    "extension",
+    "server"
+  ],
+  "scripts": {
+    "dev:extension": "npm run dev -w extension",
+    "dev:server": "npm run dev -w server",
+    "build:extension": "npm run build -w extension",
+    "build:server": "npm run build -w server",
+    "build": "npm run build --workspaces --if-present",
+    "lint:extension": "npm run lint -w extension",
+    "lint:server": "npm run lint -w server",
+    "lint": "npm run lint --workspaces --if-present",
+    "format:extension": "npm run format -w extension",
+    "format:server": "npm run format -w server",
+    "format": "npm run format --workspaces --if-present",
+    "clean": "rm -rf node_modules extension/node_modules server/node_modules extension/dist server/dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
