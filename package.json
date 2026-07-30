@@ -4,22 +4,22 @@
   "description": "Production-ready Chess AI Review monorepo containing an extension and a server.",
   "private": true,
   "workspaces": [
-    "extension",
-    "server"
+    "frontend",
+    "backend"
   ],
   "scripts": {
-    "dev:extension": "npm run dev -w extension",
-    "dev:server": "npm run dev -w server",
-    "build:extension": "npm run build -w extension",
-    "build:server": "npm run build -w server",
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:backend": "npm run dev -w backend",
+    "build:frontend": "npm run build -w frontend",
+    "build:backend": "npm run build -w backend",
     "build": "npm run build --workspaces --if-present",
-    "lint:extension": "npm run lint -w extension",
-    "lint:server": "npm run lint -w server",
+    "lint:frontend": "npm run lint -w frontend",
+    "lint:backend": "npm run lint -w backend",
     "lint": "npm run lint --workspaces --if-present",
-    "format:extension": "npm run format -w extension",
-    "format:server": "npm run format -w server",
+    "format:frontend": "npm run format -w frontend",
+    "format:backend": "npm run format -w backend",
     "format": "npm run format --workspaces --if-present",
-    "clean": "rm -rf node_modules extension/node_modules server/node_modules extension/dist server/dist"
+    "clean": "rm -rf node_modules frontend/node_modules backend/node_modules frontend/dist backend/dist backend/build"
   },
   "keywords": [],
   "author": "",

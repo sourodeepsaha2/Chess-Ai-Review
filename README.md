@@ -7,8 +7,8 @@ A production-ready monorepo workspace for the Chess AI Review project.
 The repository is organized as a monorepo using npm workspaces:
 
 ```
-├── extension/          # Frontend application (React 19 + Vite + TypeScript + Tailwind CSS)
-├── server/             # Backend application (Node.js + Express + TypeScript)
+├── frontend/           # Frontend application (React 19 + Vite + TypeScript + Tailwind CSS)
+├── backend/            # Backend application (Node.js + Express + TypeScript)
 ├── LICENSE             # MIT License
 ├── README.md           # This file
 └── package.json        # Root package configuration (Workspaces & shared scripts)
@@ -40,10 +40,10 @@ All scripts can be run from the root of the project:
 Start development servers for both workspaces or target them individually:
 
 ```bash
-# Start both extension and server in development mode
+# Start both frontend and backend in development mode
 # (Note: You can run these in separate terminal tabs)
-npm run dev:extension
-npm run dev:server
+npm run dev:frontend
+npm run dev:backend
 ```
 
 #### Production Build
@@ -54,11 +54,11 @@ Build the project workspace outputs:
 # Build all workspaces
 npm run build
 
-# Build extension only
-npm run build:extension
+# Build frontend only
+npm run build:frontend
 
-# Build server only
-npm run build:server
+# Build backend only
+npm run build:backend
 ```
 
 #### Linting & Formatting
@@ -75,13 +75,13 @@ npm run format
 
 ## Technologies Used
 
-### Extension
+### Frontend
 - **Framework**: React 19, Vite
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
 - **Code Quality**: ESLint, Prettier
 
-### Server
+### Backend
 - **Framework**: Express, Node.js
 - **Language**: TypeScript
 - **Code Quality**: ESLint, Prettier
