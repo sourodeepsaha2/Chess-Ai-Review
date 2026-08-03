@@ -1,11 +1,28 @@
 import { useEffect, useState } from 'react'
 import { messagingService } from './services/messagingService'
 import type { MessagePayloads } from './types/messaging'
+import { analysisService } from './services/analysisService'
 
 function SidePanelApp() {
   const [activePage, setActivePage] = useState<MessagePayloads['PAGE_READY'] | null>(null)
   const [analysis, setAnalysis] = useState<MessagePayloads['ANALYSIS_RECEIVED'] | null>(null)
   const [status, setStatus] = useState<'idle' | 'analyzing' | 'completed'>('idle')
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle')
+
+  const handleTestConnection = async () => {
+    setConnectionStatus('testing')
+    try {
+      const response = await analysisService.analyseGame()
+      if (response && response.success) {
+        setConnectionStatus('success')
+      } else {
+        setConnectionStatus('failed')
+      }
+    } catch (err) {
+      console.error('[SidePanel] Connection test failed:', err)
+      setConnectionStatus('failed')
+    }
+  }
 
   useEffect(() => {
     // Notify Background that the Side Panel is loaded and ready
@@ -96,8 +113,50 @@ function SidePanelApp() {
           )}
         </div>
 
+        {/* API Connection Tester */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-3 backdrop-blur-xl transition-all duration-300 hover:border-slate-800/50 flex flex-col space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Backend API Connection</div>
+            <div className="flex items-center gap-1.5">
+              {connectionStatus === 'testing' && (
+                <span className="text-[10px] text-indigo-450 font-semibold animate-pulse flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-ping" />
+                  Testing...
+                </span>
+              )}
+              {connectionStatus === 'success' && (
+                <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Connected successfully
+                </span>
+              )}
+              {connectionStatus === 'failed' && (
+                <span className="text-[10px] text-rose-400 font-semibold flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                  Connection failed
+                </span>
+              )}
+              {connectionStatus === 'idle' && (
+                <span className="text-[10px] text-slate-500 font-semibold">Not Tested</span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleTestConnection}
+            disabled={connectionStatus === 'testing'}
+            className={`w-full py-1.5 px-3 rounded-lg text-[10px] font-bold transition-all duration-200 border cursor-pointer ${
+              connectionStatus === 'testing'
+                ? 'bg-slate-900 border-slate-850 text-slate-550 cursor-not-allowed'
+                : 'bg-indigo-500/10 border-indigo-550/20 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/30 active:scale-95'
+            }`}
+          >
+            Test Connection
+          </button>
+        </div>
+
         {/* Action Panel */}
         <div className="flex flex-col items-center justify-center p-6 border border-slate-800 bg-slate-900/20 rounded-2xl relative overflow-hidden">
+
           <div className="absolute -top-12 left-1/2 -z-10 h-24 w-24 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-2xl" />
 
           {status === 'idle' && !analysis && (
