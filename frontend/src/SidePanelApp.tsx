@@ -9,7 +9,7 @@ function SidePanelDashboard() {
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle')
   const [extraction, setExtraction] = useState<MessagePayloads['PGN_EXTRACTED'] | null>(null)
 
-  const { status, response, error, startAnalysis, resetAnalysis } = useAnalysis()
+  const { status, response, error, phaseMessage, startAnalysis, resetAnalysis } = useAnalysis()
 
   const handleTestConnection = async () => {
     setConnectionStatus('testing')
@@ -189,7 +189,7 @@ function SidePanelDashboard() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-slate-200 animate-pulse">Running Backend Query</h3>
-                <p className="text-[11px] text-slate-400">AnalysisContext is requesting analysis...</p>
+                <p className="text-[11px] text-slate-400">Status: {phaseMessage || 'Sending game...'}</p>
               </div>
               <div className="w-full bg-slate-850 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-indigo-500 h-full w-2/3 rounded-full animate-[shimmer_1.5s_infinite]" style={{

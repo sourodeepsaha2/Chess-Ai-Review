@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { analysisService } from '../services/analysisService';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import { messagingService } from '../services/messagingService';
 import type { AnalysisResponse } from '../services/analysisService';
 
 export type AnalysisStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -8,6 +8,7 @@ interface AnalysisContextType {
   status: AnalysisStatus;
   response: AnalysisResponse | null;
   error: string | null;
+  phaseMessage: string;
   startAnalysis: () => Promise<void>;
   resetAnalysis: () => void;
 }
@@ -18,25 +19,41 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [status, setStatus] = useState<AnalysisStatus>('idle');
   const [response, setResponse] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [phaseMessage, setPhaseMessage] = useState<string>('');
+
+  // Synchronize state with events broadcast from the background routing hub
+  useEffect(() => {
+    const unsubscribeStatus = messagingService.on('ANALYSIS_STATUS', (payload) => {
+      console.log('[AnalysisContext] Received background status sync:', payload);
+      setStatus(payload.status);
+      if (payload.phaseMessage) {
+        setPhaseMessage(payload.phaseMessage);
+      }
+      if (payload.response !== undefined) {
+        setResponse(payload.response);
+      }
+      if (payload.error !== undefined) {
+        setError(payload.error);
+      }
+    });
+
+    return () => {
+      unsubscribeStatus();
+    };
+  }, []);
 
   const startAnalysis = useCallback(async () => {
     setStatus('loading');
     setError(null);
     setResponse(null);
+    setPhaseMessage('Extracting PGN...');
     try {
-      // Execute the POST /analyse connection/game analysis call
-      const result = await analysisService.analyseGame();
-      if (result && result.success) {
-        setResponse(result);
-        setStatus('success');
-      } else {
-        setStatus('error');
-        setError(result?.message || 'Server returned an unsuccessful status indicator.');
-      }
+      // Dispatch REQUEST_ANALYSIS. Background worker coordinates extraction and API calls.
+      await messagingService.sendMessage('REQUEST_ANALYSIS', { timestamp: Date.now() });
     } catch (err: any) {
-      console.error('[AnalysisContext] Analysis request failed:', err);
+      console.error('[AnalysisContext] Failed to dispatch analysis request:', err);
       setStatus('error');
-      setError(err.message || 'An unexpected error occurred during analysis.');
+      setError(err.message || 'Failed to dispatch analysis trigger.');
     }
   }, []);
 
@@ -44,6 +61,7 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setStatus('idle');
     setResponse(null);
     setError(null);
+    setPhaseMessage('');
   }, []);
 
   const value = useMemo(
@@ -51,10 +69,11 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       status,
       response,
       error,
+      phaseMessage,
       startAnalysis,
       resetAnalysis,
     }),
-    [status, response, error, startAnalysis, resetAnalysis]
+    [status, response, error, phaseMessage, startAnalysis, resetAnalysis]
   );
 
   return <AnalysisContext.Provider value={value}>{children}</AnalysisContext.Provider>;
@@ -68,3 +87,4 @@ export const useAnalysis = (): AnalysisContextType => {
   return context;
 };
 export default AnalysisContext;
+

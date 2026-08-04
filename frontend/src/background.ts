@@ -1,5 +1,6 @@
 import { messagingService } from './services/messagingService'
 import type { MessagePayloads } from './types/messaging'
+import { analysisService } from './services/analysisService'
 
 // Cache to keep track of the active page details
 let activePageState: MessagePayloads['PAGE_READY'] | null = null
@@ -39,6 +40,13 @@ messagingService.on('PAGE_READY', (payload, sender) => {
 messagingService.on('REQUEST_ANALYSIS', (payload, sender) => {
   console.log('[Background] Received REQUEST_ANALYSIS. Forwarding to active Chess tab.', { payload, sender })
   
+  // Notify Side Panel we have started extraction
+  messagingService.sendMessage('ANALYSIS_STATUS', {
+    status: 'loading',
+    phaseMessage: 'Extracting PGN...',
+    timestamp: Date.now()
+  })
+
   // Forward the analysis request to the content script running in the active tab
   messagingService.sendMessageToActiveTab('REQUEST_ANALYSIS', payload)
 })
@@ -53,6 +61,72 @@ messagingService.on('ANALYSIS_RECEIVED', (payload, sender) => {
 messagingService.on('PGN_EXTRACTED', (payload, sender) => {
   console.log('[Background] Received PGN_EXTRACTED from content script.', { payload, sender })
   
-  // Forward the PGN extraction details to the side panel
+  // 1. Forward the PGN extraction details to the side panel
   messagingService.sendMessage('PGN_EXTRACTED', payload)
+
+  const uploadPgn = async () => {
+    // 2. Check if extraction succeeded and pgn is present
+    if (!payload.success) {
+      console.log('[Background] PGN extraction failed. Aborting API upload.', payload.error)
+      messagingService.sendMessage('ANALYSIS_STATUS', {
+        status: 'error',
+        error: payload.error || 'PGN extraction failed.',
+        timestamp: Date.now()
+      })
+      return
+    }
+
+    if (!payload.pgn) {
+      console.log('[Background] PGN content is missing. Aborting API upload.')
+      messagingService.sendMessage('ANALYSIS_STATUS', {
+        status: 'error',
+        error: 'Missing PGN content: extracted string was empty.',
+        timestamp: Date.now()
+      })
+      return
+    }
+
+    // 3. Notify Side Panel we are sending the game
+    messagingService.sendMessage('ANALYSIS_STATUS', {
+      status: 'loading',
+      phaseMessage: 'Sending game...',
+      timestamp: Date.now()
+    })
+
+    // 4. Perform backend API connection call
+    try {
+      console.log('[Background] Sending PGN to backend server for analysis...')
+      const response = await analysisService.analyseGame(payload.pgn)
+      
+      if (response && response.success) {
+        console.log('[Background] Analysis request completed successfully:', response)
+        messagingService.sendMessage('ANALYSIS_STATUS', {
+          status: 'success',
+          response: {
+            success: true,
+            message: response.message,
+            timestamp: response.timestamp || Date.now()
+          },
+          timestamp: Date.now()
+        })
+      } else {
+        console.warn('[Background] Backend returned unsuccessful response:', response)
+        messagingService.sendMessage('ANALYSIS_STATUS', {
+          status: 'error',
+          error: response?.message || 'Server returned an unsuccessful analysis response.',
+          timestamp: Date.now()
+        })
+      }
+    } catch (err: any) {
+      console.error('[Background] Failed to query analysis backend API:', err)
+      messagingService.sendMessage('ANALYSIS_STATUS', {
+        status: 'error',
+        error: err.message || 'Network request failed or timed out.',
+        timestamp: Date.now()
+      })
+    }
+  }
+
+  uploadPgn()
 })
+

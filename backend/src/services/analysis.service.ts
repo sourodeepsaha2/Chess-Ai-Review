@@ -26,10 +26,11 @@ export class AnalysisService {
       // Future Stockfish engine or review processor calls will be mounted here.
       return {
         success: true,
-        message: 'PGN received. Placeholder analysis logic succeeded.',
+        message: 'Game uploaded successfully',
         pgnProcessed: true,
       };
     }
+
 
     throw new Error('Analysis Service Error: Neither test flag nor PGN was provided.');
   }

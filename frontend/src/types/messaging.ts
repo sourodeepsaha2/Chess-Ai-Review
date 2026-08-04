@@ -3,7 +3,8 @@ export type MessageType =
   | 'PAGE_READY'
   | 'REQUEST_ANALYSIS'
   | 'ANALYSIS_RECEIVED'
-  | 'PGN_EXTRACTED';
+  | 'PGN_EXTRACTED'
+  | 'ANALYSIS_STATUS';
 
 export interface MessagePayloads {
   EXTENSION_READY: {
@@ -32,6 +33,17 @@ export interface MessagePayloads {
     error?: string;
     timestamp: number;
   };
+  ANALYSIS_STATUS: {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    phaseMessage?: string;
+    response?: {
+      success: boolean;
+      message: string;
+      timestamp?: number;
+    } | null;
+    error?: string | null;
+    timestamp: number;
+  };
 }
 
 export interface ExtensionMessage<T extends MessageType> {
@@ -43,5 +55,7 @@ export type AnyExtensionMessage =
   | { type: 'PAGE_READY'; payload: MessagePayloads['PAGE_READY'] }
   | { type: 'REQUEST_ANALYSIS'; payload: MessagePayloads['REQUEST_ANALYSIS'] }
   | { type: 'ANALYSIS_RECEIVED'; payload: MessagePayloads['ANALYSIS_RECEIVED'] }
-  | { type: 'PGN_EXTRACTED'; payload: MessagePayloads['PGN_EXTRACTED'] };
+  | { type: 'PGN_EXTRACTED'; payload: MessagePayloads['PGN_EXTRACTED'] }
+  | { type: 'ANALYSIS_STATUS'; payload: MessagePayloads['ANALYSIS_STATUS'] };
+
 
