@@ -3,6 +3,8 @@ import { messagingService } from './services/messagingService'
 import type { MessagePayloads } from './types/messaging'
 import { analysisService } from './services/analysisService'
 import { AnalysisProvider, useAnalysis } from './context/AnalysisContext'
+import SummaryCard from './components/SummaryCard'
+import MoveList from './components/MoveList'
 
 function SidePanelDashboard() {
   const [activePage, setActivePage] = useState<MessagePayloads['PAGE_READY'] | null>(null)
@@ -251,6 +253,20 @@ function SidePanelDashboard() {
             </div>
           )}
         </div>
+
+        {/* Summary and Move List panels when success */}
+        {status === 'success' && response && (
+          <>
+            <SummaryCard response={response} />
+            {response.moves && response.moves.length > 0 ? (
+              <MoveList moves={response.moves} />
+            ) : (
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3.5 text-center text-xs text-amber-400">
+                Empty Response: No move history was returned by the parser.
+              </div>
+            )}
+          </>
+        )}
 
         {/* PGN Extraction Result Panel */}
         {extraction && (

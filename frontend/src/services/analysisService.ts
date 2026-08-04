@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import type { ParsedMove } from '../types/analysis';
 
 export interface AnalysisResponse {
   success: boolean;
@@ -6,7 +7,10 @@ export interface AnalysisResponse {
   test?: boolean;
   timestamp?: number;
   pgnProcessed?: boolean;
+  moveCount?: number;
+  moves?: ParsedMove[];
 }
+
 
 class AnalysisService {
   /**
