@@ -30,6 +30,10 @@ export const analyseGame = async (req: Request, res: Response, next: NextFunctio
     // 3. Return response
     res.status(200).json(result)
   } catch (error) {
+    if (res.statusCode === 200) {
+      res.status(400)
+    }
     next(error)
   }
+
 }
