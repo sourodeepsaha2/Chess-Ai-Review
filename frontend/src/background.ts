@@ -49,3 +49,10 @@ messagingService.on('ANALYSIS_RECEIVED', (payload, sender) => {
   // Forward the analysis details to the side panel
   messagingService.sendMessage('ANALYSIS_RECEIVED', payload)
 })
+
+messagingService.on('PGN_EXTRACTED', (payload, sender) => {
+  console.log('[Background] Received PGN_EXTRACTED from content script.', { payload, sender })
+  
+  // Forward the PGN extraction details to the side panel
+  messagingService.sendMessage('PGN_EXTRACTED', payload)
+})

@@ -2,7 +2,8 @@ export type MessageType =
   | 'EXTENSION_READY'
   | 'PAGE_READY'
   | 'REQUEST_ANALYSIS'
-  | 'ANALYSIS_RECEIVED';
+  | 'ANALYSIS_RECEIVED'
+  | 'PGN_EXTRACTED';
 
 export interface MessagePayloads {
   EXTENSION_READY: {
@@ -24,6 +25,13 @@ export interface MessagePayloads {
     totalMoves: number;
     timestamp: number;
   };
+  PGN_EXTRACTED: {
+    success: boolean;
+    pgn?: string;
+    source: 'page' | 'manual' | 'unknown';
+    error?: string;
+    timestamp: number;
+  };
 }
 
 export interface ExtensionMessage<T extends MessageType> {
@@ -34,4 +42,6 @@ export type AnyExtensionMessage =
   | { type: 'EXTENSION_READY'; payload: MessagePayloads['EXTENSION_READY'] }
   | { type: 'PAGE_READY'; payload: MessagePayloads['PAGE_READY'] }
   | { type: 'REQUEST_ANALYSIS'; payload: MessagePayloads['REQUEST_ANALYSIS'] }
-  | { type: 'ANALYSIS_RECEIVED'; payload: MessagePayloads['ANALYSIS_RECEIVED'] };
+  | { type: 'ANALYSIS_RECEIVED'; payload: MessagePayloads['ANALYSIS_RECEIVED'] }
+  | { type: 'PGN_EXTRACTED'; payload: MessagePayloads['PGN_EXTRACTED'] };
+

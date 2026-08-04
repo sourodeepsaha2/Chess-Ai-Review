@@ -7,6 +7,7 @@ import { AnalysisProvider, useAnalysis } from './context/AnalysisContext'
 function SidePanelDashboard() {
   const [activePage, setActivePage] = useState<MessagePayloads['PAGE_READY'] | null>(null)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle')
+  const [extraction, setExtraction] = useState<MessagePayloads['PGN_EXTRACTED'] | null>(null)
 
   const { status, response, error, startAnalysis, resetAnalysis } = useAnalysis()
 
@@ -25,6 +26,16 @@ function SidePanelDashboard() {
     }
   }
 
+  const handleStartAnalysis = () => {
+    setExtraction(null)
+    startAnalysis()
+  }
+
+  const handleResetAnalysis = () => {
+    setExtraction(null)
+    resetAnalysis()
+  }
+
   useEffect(() => {
     // Notify Background that the Side Panel is loaded and ready
     messagingService.sendMessage('EXTENSION_READY', { timestamp: Date.now() })
@@ -35,8 +46,15 @@ function SidePanelDashboard() {
       setActivePage(payload)
     })
 
+    // Listen for PGN extraction completion
+    const unsubscribePgnExtracted = messagingService.on('PGN_EXTRACTED', (payload) => {
+      console.log('[SidePanel] PGN extraction received:', payload)
+      setExtraction(payload)
+    })
+
     return () => {
       unsubscribePageReady()
+      unsubscribePgnExtracted()
     }
   }, [])
 
@@ -94,7 +112,7 @@ function SidePanelDashboard() {
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Backend API Connection</div>
             <div className="flex items-center gap-1.5">
               {connectionStatus === 'testing' && (
-                <span className="text-[10px] text-indigo-450 font-semibold animate-pulse flex items-center gap-1">
+                <span className="text-[10px] text-indigo-455 font-semibold animate-pulse flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-ping" />
                   Testing...
                 </span>
@@ -146,7 +164,7 @@ function SidePanelDashboard() {
                 Initiate the backend analysis request via the centralized state management context.
               </p>
               <button
-                onClick={startAnalysis}
+                onClick={handleStartAnalysis}
                 disabled={!activePage}
                 className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-300 shadow-md ${
                   activePage
@@ -165,7 +183,7 @@ function SidePanelDashboard() {
               <div className="relative mx-auto h-16 w-16 flex items-center justify-center">
                 <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20" />
                 <div className="absolute inset-0 rounded-full border-2 border-t-indigo-500 animate-spin" />
-                <svg className="h-6 w-6 text-indigo-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6 text-indigo-455 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1" />
                 </svg>
               </div>
@@ -196,7 +214,7 @@ function SidePanelDashboard() {
                 <p className="text-[9px] text-slate-500">Timestamp: {new Date(response.timestamp || Date.now()).toLocaleTimeString()}</p>
               </div>
               <button
-                onClick={resetAnalysis}
+                onClick={handleResetAnalysis}
                 className="w-full py-2 bg-slate-900 hover:bg-slate-850 text-slate-300 text-xs font-semibold rounded-xl border border-slate-800 transition-colors duration-200 cursor-pointer"
               >
                 Reset Analysis
@@ -218,13 +236,13 @@ function SidePanelDashboard() {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={startAnalysis}
+                  onClick={handleStartAnalysis}
                   className="flex-1 py-2 bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition-colors duration-200 cursor-pointer"
                 >
                   Retry
                 </button>
                 <button
-                  onClick={resetAnalysis}
+                  onClick={handleResetAnalysis}
                   className="flex-1 py-2 bg-slate-900 hover:bg-slate-850 text-slate-300 text-xs font-semibold rounded-xl border border-slate-800 transition-colors duration-200 cursor-pointer"
                 >
                   Reset
@@ -233,6 +251,53 @@ function SidePanelDashboard() {
             </div>
           )}
         </div>
+
+        {/* PGN Extraction Result Panel */}
+        {extraction && (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4 backdrop-blur-xl transition-all duration-300 hover:border-slate-800/50 flex flex-col space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">PGN Extraction</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full ${extraction.success ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                <span className={`text-[9px] font-semibold uppercase tracking-wider ${extraction.success ? 'text-emerald-400' : 'text-rose-455'}`}>
+                  {extraction.success ? 'Success' : 'Failed'}
+                </span>
+              </div>
+            </div>
+
+            {extraction.success && extraction.pgn ? (
+              <div className="flex flex-col space-y-2">
+                <div className="text-[9px] text-slate-400">
+                  Source: <span className="font-semibold text-slate-350">{extraction.source}</span>
+                </div>
+                <textarea
+                  readOnly
+                  value={extraction.pgn}
+                  className="w-full h-24 p-2 bg-slate-950 border border-slate-850 rounded-lg text-[10px] font-mono text-slate-300 focus:outline-none focus:border-indigo-500/50 resize-none"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(extraction.pgn || '')
+                  }}
+                  className="self-end py-1 px-2.5 bg-slate-850 hover:bg-slate-800 text-[9px] font-bold text-indigo-400 rounded border border-slate-800 transition-colors duration-200 cursor-pointer"
+                >
+                  Copy PGN
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-1">
+                <div className="text-[10px] text-rose-400 leading-relaxed bg-rose-500/5 border border-rose-500/10 rounded-lg p-2.5">
+                  {extraction.error}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
   )
@@ -245,3 +310,4 @@ export default function SidePanelApp() {
     </AnalysisProvider>
   )
 }
+

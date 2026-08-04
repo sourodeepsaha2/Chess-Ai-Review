@@ -1,4 +1,5 @@
 import { messagingService } from './services/messagingService'
+import { pgnExtractor } from './services/pgnExtractor'
 
 console.log('Chess AI Review: Content script injected and active.')
 
@@ -17,7 +18,32 @@ messagingService.sendMessage('PAGE_READY', {
 messagingService.on('REQUEST_ANALYSIS', (payload, sender) => {
   console.log('[Content] Received REQUEST_ANALYSIS from background.', { payload, sender })
   
+  // Asynchronously extract PGN and notify the background worker
+  pgnExtractor.extractPgn().then((result) => {
+    console.log('[Content] PGN extraction result:', result)
+    messagingService.sendMessage('PGN_EXTRACTED', {
+      success: result.success,
+      pgn: result.pgn,
+      source: result.source,
+      error: result.error,
+      timestamp: Date.now()
+    }).catch((err) => {
+      console.error('[Content] Failed to dispatch PGN_EXTRACTED event:', err)
+    })
+  }).catch((err) => {
+    console.error('[Content] Error running PGN extraction:', err)
+    messagingService.sendMessage('PGN_EXTRACTED', {
+      success: false,
+      source: 'unknown',
+      error: `Unexpected extraction exception: ${err.message || err}`,
+      timestamp: Date.now()
+    }).catch((e) => {
+      console.error('[Content] Failed to dispatch PGN_EXTRACTED error event:', e)
+    })
+  })
+
   // Simulate chess engine evaluation delay
+
   setTimeout(() => {
     // Generate clean mock chess analysis
     const bestMoves = ['e4', 'Nf3', 'd4', 'Bc4', 'O-O', 'Nc3', 'd6', 'Bg5']
