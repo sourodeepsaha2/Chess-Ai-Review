@@ -40,8 +40,13 @@ export interface MessagePayloads {
       success: boolean;
       message: string;
       timestamp?: number;
+      moves?: any[];
+      moveCount?: number;
     } | null;
     error?: string | null;
+    progress?: number;
+    currentMove?: number;
+    totalMoves?: number;
     timestamp: number;
   };
 }

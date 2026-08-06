@@ -9,6 +9,9 @@ interface AnalysisContextType {
   response: AnalysisResponse | null;
   error: string | null;
   phaseMessage: string;
+  progress: number;
+  currentMove: number;
+  totalMoves: number;
   startAnalysis: () => Promise<void>;
   resetAnalysis: () => void;
 }
@@ -20,6 +23,9 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [response, setResponse] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [phaseMessage, setPhaseMessage] = useState<string>('');
+  const [progress, setProgress] = useState<number>(0);
+  const [currentMove, setCurrentMove] = useState<number>(0);
+  const [totalMoves, setTotalMoves] = useState<number>(0);
 
   // Synchronize state with events broadcast from the background routing hub
   useEffect(() => {
@@ -35,6 +41,15 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (payload.error !== undefined) {
         setError(payload.error);
       }
+      if (payload.progress !== undefined) {
+        setProgress(payload.progress);
+      }
+      if (payload.currentMove !== undefined) {
+        setCurrentMove(payload.currentMove);
+      }
+      if (payload.totalMoves !== undefined) {
+        setTotalMoves(payload.totalMoves);
+      }
     });
 
     return () => {
@@ -47,6 +62,9 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setError(null);
     setResponse(null);
     setPhaseMessage('Extracting PGN...');
+    setProgress(0);
+    setCurrentMove(0);
+    setTotalMoves(0);
     try {
       // Dispatch REQUEST_ANALYSIS. Background worker coordinates extraction and API calls.
       await messagingService.sendMessage('REQUEST_ANALYSIS', { timestamp: Date.now() });
@@ -62,6 +80,9 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setResponse(null);
     setError(null);
     setPhaseMessage('');
+    setProgress(0);
+    setCurrentMove(0);
+    setTotalMoves(0);
   }, []);
 
   const value = useMemo(
@@ -70,11 +91,15 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       response,
       error,
       phaseMessage,
+      progress,
+      currentMove,
+      totalMoves,
       startAnalysis,
       resetAnalysis,
     }),
-    [status, response, error, phaseMessage, startAnalysis, resetAnalysis]
+    [status, response, error, phaseMessage, progress, currentMove, totalMoves, startAnalysis, resetAnalysis]
   );
+
 
   return <AnalysisContext.Provider value={value}>{children}</AnalysisContext.Provider>;
 };

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { analysisService } from '../services/analysis.service'
+import { analysisQueueService } from '../services/analysisQueue.service'
 import logger from '../utils/logger'
 
 export const analyseGame = async (req: Request, res: Response, next: NextFunction) => {
@@ -22,18 +23,54 @@ export const analyseGame = async (req: Request, res: Response, next: NextFunctio
       throw new Error('Validation Error: "pgn" field must be a string.')
     }
 
-    logger.info(`[Backend] Processing analysis request: test = ${test}, pgn = ${pgn ? 'provided' : 'none'}`)
+    if (test) {
+      logger.info('[Backend] Processing connection test request')
+      const result = await analysisService.runAnalysis({ test })
+      return res.status(200).json(result)
+    }
+
+    // PGN analysis trigger: Create background job
+    logger.info(`[Backend] Enqueuing PGN analysis request`)
+    const analysisId = analysisQueueService.createJob(pgn)
     
-    // 2. Call Service layer
-    const result = await analysisService.runAnalysis({ test, pgn })
-    
-    // 3. Return response
-    res.status(200).json(result)
+    res.status(202).json({
+      success: true,
+      message: 'Analysis job accepted and enqueued.',
+      analysisId,
+    })
   } catch (error) {
     if (res.statusCode === 200) {
       res.status(400)
     }
     next(error)
   }
+}
+
+export const getAnalysisStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const job = analysisQueueService.getJob(id)
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: 'Analysis job not found.',
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      id: job.id,
+      status: job.status,
+      progress: job.progress,
+      currentMove: job.currentMove,
+      totalMoves: job.totalMoves,
+      moves: job.moves,
+      error: job.error,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 }

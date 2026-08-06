@@ -93,32 +93,83 @@ messagingService.on('PGN_EXTRACTED', (payload, sender) => {
       timestamp: Date.now()
     })
 
-    // 4. Perform backend API connection call
+    // 4. Perform background API connection call
     try {
-      console.log('[Background] Sending PGN to backend server for analysis...')
-      const response = await analysisService.analyseGame(payload.pgn)
+      console.log('[Background] Enqueuing PGN on backend queue...')
+      const startResponse = await analysisService.startAnalysisJob(payload.pgn)
       
-      if (response && response.success) {
-        console.log('[Background] Analysis request completed successfully:', response)
-        messagingService.sendMessage('ANALYSIS_STATUS', {
-          status: 'success',
-          response: {
-            success: true,
-            message: response.message,
-            timestamp: response.timestamp || Date.now()
-          },
-          timestamp: Date.now()
-        })
-      } else {
-        console.warn('[Background] Backend returned unsuccessful response:', response)
-        messagingService.sendMessage('ANALYSIS_STATUS', {
-          status: 'error',
-          error: response?.message || 'Server returned an unsuccessful analysis response.',
-          timestamp: Date.now()
-        })
+      if (!startResponse || !startResponse.success || !startResponse.analysisId) {
+        throw new Error(startResponse?.message || 'Server rejected the analysis request.')
       }
+
+      const jobId = startResponse.analysisId
+      console.log(`[Background] Analysis job successfully enqueued: ${jobId}. Initiating poll loop...`)
+
+      // Start polling status
+      const pollInterval = 1000
+      const runPoll = async () => {
+        try {
+          const statusResponse = await analysisService.getAnalysisJobStatus(jobId)
+          
+          if (!statusResponse || !statusResponse.success) {
+            throw new Error(statusResponse?.error || 'Failed to retrieve job status.')
+          }
+
+          console.log(`[Background] Job ${jobId} Status: ${statusResponse.status}, Progress: ${statusResponse.progress}%`)
+
+          if (statusResponse.status === 'success') {
+            messagingService.sendMessage('ANALYSIS_STATUS', {
+              status: 'success',
+              phaseMessage: 'Finished',
+              response: {
+                success: true,
+                message: 'Game uploaded successfully',
+                moveCount: statusResponse.totalMoves,
+                moves: statusResponse.moves || [],
+                timestamp: Date.now()
+              },
+              timestamp: Date.now()
+            })
+            return // stop polling
+          }
+
+          if (statusResponse.status === 'error') {
+            messagingService.sendMessage('ANALYSIS_STATUS', {
+              status: 'error',
+              error: statusResponse.error || 'Analysis process encountered an error.',
+              timestamp: Date.now()
+            })
+            return // stop polling
+          }
+
+          // Still running (loading / analyzing): Send progress update to UI
+          messagingService.sendMessage('ANALYSIS_STATUS', {
+            status: 'loading',
+            phaseMessage: `Move ${statusResponse.currentMove} / ${statusResponse.totalMoves}`,
+            progress: statusResponse.progress,
+            currentMove: statusResponse.currentMove,
+            totalMoves: statusResponse.totalMoves,
+            timestamp: Date.now()
+          })
+
+          // Schedule next poll
+          setTimeout(runPoll, pollInterval)
+
+        } catch (pollErr: any) {
+          console.error('[Background] Polling error:', pollErr)
+          messagingService.sendMessage('ANALYSIS_STATUS', {
+            status: 'error',
+            error: pollErr.message || 'Lost connection to backend server during analysis.',
+            timestamp: Date.now()
+          })
+        }
+      }
+
+      // Start first poll after interval
+      setTimeout(runPoll, pollInterval)
+
     } catch (err: any) {
-      console.error('[Background] Failed to query analysis backend API:', err)
+      console.error('[Background] Failed to enqueue analysis:', err)
       messagingService.sendMessage('ANALYSIS_STATUS', {
         status: 'error',
         error: err.message || 'Network request failed or timed out.',

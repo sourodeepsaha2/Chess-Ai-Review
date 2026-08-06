@@ -56,6 +56,13 @@ export class ApiClient {
       body: JSON.stringify(body),
     });
   }
+
+  async get<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(path, {
+      ...options,
+      method: 'GET',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

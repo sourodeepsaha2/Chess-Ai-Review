@@ -11,7 +11,7 @@ function SidePanelDashboard() {
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle')
   const [extraction, setExtraction] = useState<MessagePayloads['PGN_EXTRACTED'] | null>(null)
 
-  const { status, response, error, phaseMessage, startAnalysis, resetAnalysis } = useAnalysis()
+  const { status, response, error, phaseMessage, progress, currentMove, totalMoves, startAnalysis, resetAnalysis } = useAnalysis()
 
   const handleTestConnection = async () => {
     setConnectionStatus('testing')
@@ -189,16 +189,32 @@ function SidePanelDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1" />
                 </svg>
               </div>
+
               <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-slate-200 animate-pulse">Running Backend Query</h3>
-                <p className="text-[11px] text-slate-400">Status: {phaseMessage || 'Sending game...'}</p>
+                <h3 className="text-sm font-semibold text-slate-200 animate-pulse">
+                  {progress > 0 ? 'Analyzing...' : 'Running Backend Query'}
+                </h3>
+                {progress > 0 && currentMove > 0 && totalMoves > 0 ? (
+                  <p className="text-[11px] text-indigo-400 font-bold">
+                    Move {currentMove} / {totalMoves}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-400">Status: {phaseMessage || 'Sending game...'}</p>
+                )}
               </div>
-              <div className="w-full bg-slate-850 h-1.5 rounded-full overflow-hidden">
-                <div className="bg-indigo-500 h-full w-2/3 rounded-full animate-[shimmer_1.5s_infinite]" style={{
-                  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)',
-                  backgroundSize: '200% 100%'
-                }} />
+
+              {/* Progress Bar */}
+              <div className="w-full bg-slate-850 h-2 rounded-full overflow-hidden border border-slate-900">
+                <div 
+                  className="bg-indigo-500 h-full rounded-full transition-all duration-300 ease-out" 
+                  style={{ width: `${Math.min(100, Math.max(0, progress || (progress === 0 && phaseMessage ? 0 : 33)))}%` }} 
+                />
               </div>
+              {progress > 0 && (
+                <div className="text-[9px] font-bold text-indigo-400 font-mono tracking-wider">
+                  {progress}% Complete
+                </div>
+              )}
             </div>
           )}
 
