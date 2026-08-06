@@ -1,4 +1,6 @@
 import { parserService } from './parser.service';
+import { stockfishUCI } from './stockfish';
+import logger from '../utils/logger';
 
 export interface AnalysisRequest {
   test?: boolean;
@@ -28,13 +30,41 @@ export class AnalysisService {
 
     if (data.pgn) {
       const parsedGame = parserService.parsePgn(data.pgn);
+      const analyzedMoves: any[] = [];
+
+      for (const move of parsedGame.moves) {
+        let evaluation = 0;
+        let bestMove = '';
+        let pv: string[] = [];
+
+        try {
+          // Analyze position FEN immediately after this move was made
+          const analysis = await stockfishUCI.analysePosition(move.fenAfterMove);
+          evaluation = analysis.evaluation;
+          bestMove = analysis.bestMove;
+          pv = analysis.pv;
+        } catch (err: any) {
+          logger.error(`[AnalysisService] Stockfish failed for FEN [${move.fenAfterMove}]: ${err.message}`);
+        }
+
+        analyzedMoves.push({
+          moveNumber: move.moveNumber,
+          san: move.san,
+          fen: move.fenAfterMove,
+          fenAfterMove: move.fenAfterMove, // Backwards compatibility for UI
+          turn: move.turn,                 // Backwards compatibility for UI
+          evaluation,
+          bestMove,
+          principalVariation: pv,
+        });
+      }
       
       return {
         success: true,
         message: 'Game uploaded successfully',
         pgnProcessed: true,
         moveCount: parsedGame.moveCount,
-        moves: parsedGame.moves,
+        moves: analyzedMoves,
       };
     }
 
@@ -43,4 +73,5 @@ export class AnalysisService {
 }
 
 export const analysisService = new AnalysisService();
+
 
