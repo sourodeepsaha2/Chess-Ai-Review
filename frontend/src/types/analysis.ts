@@ -1,6 +1,11 @@
 export interface ParsedMove {
   moveNumber: number;
   san: string;
-  fenAfterMove: string;
-  turn: 'w' | 'b';
+  fen: string;
+  fenAfterMove?: string;
+  turn?: 'w' | 'b';
+  evaluation?: number;
+  bestMove?: string;
+  principalVariation?: string[];
 }
+

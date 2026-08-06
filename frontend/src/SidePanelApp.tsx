@@ -268,7 +268,37 @@ function SidePanelDashboard() {
           </>
         )}
 
+        {/* Skeleton Placeholders during Loading */}
+        {status === 'loading' && (
+          <div className="flex flex-col space-y-3.5 animate-pulse">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">Move History</span>
+              <span className="text-[10px] font-bold text-slate-700 font-mono">Analyzing...</span>
+            </div>
+            
+            <div className="flex flex-col space-y-2.5">
+              {[1, 2, 3].map((val) => (
+                <div key={val} className="rounded-xl border border-slate-900/40 bg-slate-900/10 p-3.5 flex flex-col space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-6 bg-slate-900/40 rounded" />
+                      <div className="h-4 w-10 bg-slate-900/40 rounded" />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-4 w-12 bg-slate-900/40 rounded" />
+                      <div className="h-3.5 w-10 bg-slate-950/40 rounded border border-slate-900/60" />
+                    </div>
+                  </div>
+                  <div className="h-10 bg-slate-950/40 rounded-lg border border-slate-900/60" />
+                  <div className="h-5 bg-slate-900/30 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* PGN Extraction Result Panel */}
+
         {extraction && (
           <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4 backdrop-blur-xl transition-all duration-300 hover:border-slate-800/50 flex flex-col space-y-3">
             <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
