@@ -1,6 +1,8 @@
+import { Chess } from 'chess.js';
 import logger from '../utils/logger';
 import { parserService } from './parser.service';
 import { stockfishUCI } from './stockfish';
+import { calculateCentipawnLoss } from './analysis/centipawnLoss';
 
 export interface JobState {
   id: string;
@@ -99,7 +101,30 @@ export class AnalysisQueueService {
       return;
     }
 
+    // Extract starting position FEN (before the first move)
+    let initialFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    try {
+      const chessObj = new Chess();
+      chessObj.loadPgn(pgn);
+      const fenHeader = chessObj.header().FEN;
+      if (fenHeader) {
+        initialFen = fenHeader;
+      }
+    } catch (err: any) {
+      logger.warn(`[AnalysisQueue] Failed to determine starting FEN header. Defaulting to standard: ${err.message}`);
+    }
+
+    // 2. Perform Stockfish analysis on the initial FEN position
+    let initialEval = 0;
+    try {
+      const initialAnalysis = await stockfishUCI.analysePosition(initialFen);
+      initialEval = initialAnalysis.evaluation;
+    } catch (err: any) {
+      logger.error(`[AnalysisQueue] Failed to analyze initial FEN [${initialFen}] for job ${job.id}: ${err.message}`);
+    }
+
     const analyzedMoves: any[] = [];
+    let currentBestEval = initialEval;
 
     for (let i = 0; i < total; i++) {
       const move = parsedGame.moves[i];
@@ -113,7 +138,7 @@ export class AnalysisQueueService {
       let pv: string[] = [];
 
       try {
-        // Send FEN position to Stockfish
+        // Send FEN position to Stockfish (after the move has been played)
         const analysis = await stockfishUCI.analysePosition(move.fenAfterMove);
         evaluation = analysis.evaluation;
         bestMove = analysis.bestMove;
@@ -121,6 +146,9 @@ export class AnalysisQueueService {
       } catch (err: any) {
         logger.error(`[AnalysisQueue] Stockfish failed for FEN [${move.fenAfterMove}] in job ${job.id}: ${err.message}`);
       }
+
+      // Calculate Centipawn Loss comparing pre-move vs post-move evaluations
+      const cplResult = calculateCentipawnLoss(currentBestEval, evaluation, move.turn);
 
       analyzedMoves.push({
         moveNumber: move.moveNumber,
@@ -131,7 +159,13 @@ export class AnalysisQueueService {
         evaluation,
         bestMove,
         principalVariation: pv,
+        playedEvaluation: cplResult.playedEvaluation,
+        bestEvaluation: cplResult.bestEvaluation,
+        centipawnLoss: cplResult.centipawnLoss,
       });
+
+      // Update currentBestEval to the played evaluation for the next move's baseline
+      currentBestEval = evaluation;
     }
 
     job.moves = analyzedMoves;
@@ -142,3 +176,4 @@ export class AnalysisQueueService {
 }
 
 export const analysisQueueService = new AnalysisQueueService();
+

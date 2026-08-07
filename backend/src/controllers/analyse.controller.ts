@@ -73,4 +73,3 @@ export const getAnalysisStatus = async (req: Request, res: Response, next: NextF
   }
 }
 
-}
