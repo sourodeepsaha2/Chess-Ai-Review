@@ -7,5 +7,14 @@ export interface ParsedMove {
   evaluation?: number;
   bestMove?: string;
   principalVariation?: string[];
+  playedEvaluation?: number;
+  bestEvaluation?: number;
+  centipawnLoss?: number;
+  classification?: {
+    classification: string;
+    color: string;
+    icon: string;
+  };
 }
+
 

@@ -295,17 +295,30 @@ function SidePanelDashboard() {
             <div className="flex flex-col space-y-2.5">
               {[1, 2, 3].map((val) => (
                 <div key={val} className="rounded-xl border border-slate-900/40 bg-slate-900/10 p-3.5 flex flex-col space-y-3">
+                  {/* Header: Move Number, SAN, Classification, evaluation */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-4 w-6 bg-slate-900/40 rounded" />
-                      <div className="h-4 w-10 bg-slate-900/40 rounded" />
+                      <div className="h-4 w-5 bg-slate-900/40 rounded" />
+                      <div className="h-4 w-8 bg-slate-900/40 rounded" />
+                      <div className="h-4 w-12 bg-slate-900/40 rounded-full" />
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="h-4 w-12 bg-slate-900/40 rounded" />
-                      <div className="h-3.5 w-10 bg-slate-950/40 rounded border border-slate-900/60" />
+                      <div className="h-4 w-8 bg-slate-900/40 rounded" />
+                      <div className="h-4 w-8 bg-slate-900/40 rounded" />
+                      <div className="h-3.5 w-10 bg-slate-950/45 rounded border border-slate-900/60" />
                     </div>
                   </div>
-                  <div className="h-10 bg-slate-950/40 rounded-lg border border-slate-900/60" />
+                  {/* Advantage Gauge skeleton */}
+                  <div className="h-9 bg-slate-950/20 rounded-lg border border-slate-900/40 p-2 flex flex-col justify-between">
+                    <div className="flex justify-between">
+                      <div className="h-2 w-16 bg-slate-900/40 rounded" />
+                      <div className="h-2.5 w-12 bg-slate-900/40 rounded" />
+                    </div>
+                    <div className="h-1 bg-slate-950/40 rounded-full" />
+                  </div>
+                  {/* Board Position FEN skeleton */}
+                  <div className="h-10 bg-slate-950/45 rounded-lg border border-slate-900/65" />
+                  {/* Best Move skeleton */}
                   <div className="h-5 bg-slate-900/30 rounded" />
                 </div>
               ))}
