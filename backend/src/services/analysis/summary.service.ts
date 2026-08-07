@@ -1,3 +1,5 @@
+import { calculateAccuracy } from './accuracy';
+
 export interface SummaryResult {
   totalMoves: number;
   averageCentipawnLoss: number;
@@ -11,7 +13,9 @@ export interface SummaryResult {
     Mistake: number;
     Blunder: number;
   };
-  // Open index signature for future extension (e.g. accuracy, opening theory)
+  whiteAccuracy?: number;
+  blackAccuracy?: number;
+  // Open index signature for future extension (e.g. opening theory)
   [key: string]: any;
 }
 
@@ -39,6 +43,8 @@ export class SummaryService {
         totalMoves: 0,
         averageCentipawnLoss: 0,
         classificationCounts,
+        whiteAccuracy: 100,
+        blackAccuracy: 100,
       };
     }
 
@@ -54,14 +60,20 @@ export class SummaryService {
     });
 
     const averageCentipawnLoss = Math.round((totalCpl / totalMoves) * 10) / 10; // 1 decimal precision
+    
+    // Calculate player accuracies based on CPL & Classifications
+    const accuracy = calculateAccuracy(moves);
 
     return {
       totalMoves,
       averageCentipawnLoss,
       classificationCounts,
+      whiteAccuracy: accuracy.whiteAccuracy,
+      blackAccuracy: accuracy.blackAccuracy,
     };
   }
 }
 
 export const summaryService = new SummaryService();
 export default summaryService;
+

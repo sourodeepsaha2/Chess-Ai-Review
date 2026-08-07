@@ -8,6 +8,8 @@ interface SummaryCardProps {
 export const SummaryCard: React.FC<SummaryCardProps> = ({ response }) => {
   const totalMoves = response.summary?.totalMoves || response.moveCount || 0;
   const avgCpl = response.summary?.averageCentipawnLoss ?? 0;
+  const whiteAcc = response.summary?.whiteAccuracy;
+  const blackAcc = response.summary?.blackAccuracy;
   const counts = response.summary?.classificationCounts || {
     Brilliant: 0,
     Great: 0,
@@ -68,6 +70,36 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ response }) => {
         </div>
       </div>
 
+      {/* Accuracy Ratings */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-lg border border-slate-850 bg-slate-950/40 p-3 flex flex-col justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-100 shadow-[0_0_4px_rgba(255,255,255,0.4)]" />
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">White Accuracy</span>
+          </div>
+          <span className={`text-base font-extrabold mt-1.5 font-mono ${
+            whiteAcc !== undefined 
+              ? (whiteAcc >= 85 ? 'text-emerald-400' : whiteAcc >= 70 ? 'text-yellow-500' : 'text-rose-455') 
+              : 'text-slate-400'
+          }`}>
+            {whiteAcc !== undefined ? `${whiteAcc.toFixed(1)}%` : '--%'}
+          </span>
+        </div>
+        <div className="rounded-lg border border-slate-850 bg-slate-950/40 p-3 flex flex-col justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-950 border border-slate-750" />
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Black Accuracy</span>
+          </div>
+          <span className={`text-base font-extrabold mt-1.5 font-mono ${
+            blackAcc !== undefined 
+              ? (blackAcc >= 85 ? 'text-emerald-400' : blackAcc >= 70 ? 'text-yellow-500' : 'text-rose-455') 
+              : 'text-slate-400'
+          }`}>
+            {blackAcc !== undefined ? `${blackAcc.toFixed(1)}%` : '--%'}
+          </span>
+        </div>
+      </div>
+
       {/* Grid of Classification Counts */}
       <div className="flex flex-col space-y-2">
         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-855/40 pb-1">Move Quality Breakdown</span>
@@ -84,20 +116,14 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ response }) => {
         </div>
       </div>
 
-      {/* Future Upgrades: Open Index slots for Accuracy / Opening Detection */}
+      {/* Future Upgrades: Open Index slots for Opening Detection */}
       <div className="border-t border-slate-850/60 pt-3 flex flex-col space-y-2">
-        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Performance Metrics</span>
-        <div className="grid grid-cols-2 gap-2">
-          {/* Accuracy Placeholder */}
-          <div className="flex items-center justify-between p-2 rounded bg-slate-950/20 border border-dashed border-slate-800 opacity-60">
-            <span className="text-[9px] text-slate-400 font-medium">Accuracy</span>
-            <span className="text-[9px] text-slate-500 font-mono italic">--%</span>
-          </div>
-
+        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Upcoming AI Features</span>
+        <div className="grid grid-cols-1 gap-2">
           {/* Opening Detection Placeholder */}
           <div className="flex items-center justify-between p-2 rounded bg-slate-950/20 border border-dashed border-slate-800 opacity-60">
-            <span className="text-[9px] text-slate-400 font-medium">Opening</span>
-            <span className="text-[9px] text-slate-500 font-mono italic">--</span>
+            <span className="text-[9px] text-slate-400 font-medium">Opening Theory Detection</span>
+            <span className="text-[9px] text-slate-500 font-mono italic">Future Upgrade</span>
           </div>
         </div>
       </div>

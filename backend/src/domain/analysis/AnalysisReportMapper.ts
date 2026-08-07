@@ -42,7 +42,9 @@ export class AnalysisReportMapper {
     const summary = new Summary(
       job.summary?.averageCentipawnLoss || 0,
       job.summary?.classificationCounts || {},
-      overallEvaluation
+      overallEvaluation,
+      job.summary?.whiteAccuracy ?? 100,
+      job.summary?.blackAccuracy ?? 100
     );
 
     return new AnalysisReport(

@@ -137,6 +137,8 @@ messagingService.on('PGN_EXTRACTED', (payload, sender) => {
                   totalMoves: report.totalMoves,
                   averageCentipawnLoss: report.summary.averageCentipawnLoss,
                   classificationCounts: report.summary.moveClassificationCounts,
+                  whiteAccuracy: report.summary.whiteAccuracy,
+                  blackAccuracy: report.summary.blackAccuracy,
                 } : undefined,
                 timestamp: Date.now()
               },
