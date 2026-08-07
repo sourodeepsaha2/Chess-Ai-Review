@@ -4,7 +4,8 @@ export type MessageType =
   | 'REQUEST_ANALYSIS'
   | 'ANALYSIS_RECEIVED'
   | 'PGN_EXTRACTED'
-  | 'ANALYSIS_STATUS';
+  | 'ANALYSIS_STATUS'
+  | 'LOAD_BOARD_POSITION';
 
 export interface MessagePayloads {
   EXTENSION_READY: {
@@ -50,6 +51,10 @@ export interface MessagePayloads {
     totalMoves?: number;
     timestamp: number;
   };
+  LOAD_BOARD_POSITION: {
+    fen: string;
+    timestamp: number;
+  };
 }
 
 export interface ExtensionMessage<T extends MessageType> {
@@ -62,6 +67,7 @@ export type AnyExtensionMessage =
   | { type: 'REQUEST_ANALYSIS'; payload: MessagePayloads['REQUEST_ANALYSIS'] }
   | { type: 'ANALYSIS_RECEIVED'; payload: MessagePayloads['ANALYSIS_RECEIVED'] }
   | { type: 'PGN_EXTRACTED'; payload: MessagePayloads['PGN_EXTRACTED'] }
-  | { type: 'ANALYSIS_STATUS'; payload: MessagePayloads['ANALYSIS_STATUS'] };
+  | { type: 'ANALYSIS_STATUS'; payload: MessagePayloads['ANALYSIS_STATUS'] }
+  | { type: 'LOAD_BOARD_POSITION'; payload: MessagePayloads['LOAD_BOARD_POSITION'] };
 
 

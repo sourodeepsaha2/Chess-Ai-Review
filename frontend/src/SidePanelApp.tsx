@@ -10,6 +10,7 @@ function SidePanelDashboard() {
   const [activePage, setActivePage] = useState<MessagePayloads['PAGE_READY'] | null>(null)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle')
   const [extraction, setExtraction] = useState<MessagePayloads['PGN_EXTRACTED'] | null>(null)
+  const [showSummary, setShowSummary] = useState(true)
 
   const { status, response, error, phaseMessage, progress, currentMove, totalMoves, startAnalysis, resetAnalysis } = useAnalysis()
 
@@ -273,7 +274,41 @@ function SidePanelDashboard() {
         {/* Summary and Move List panels when success */}
         {status === 'success' && response && (
           <>
-            <SummaryCard response={response} />
+            {/* Header for Summary Card with Collapse toggle */}
+            <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-3.5 backdrop-blur-xl transition-all duration-300">
+              <div 
+                onClick={() => setShowSummary(!showSummary)}
+                className="flex items-center justify-between cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <svg 
+                    className={`h-4 w-4 text-indigo-400 transform transition-transform duration-200 ${showSummary ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  <span className="text-xs font-bold text-slate-200">
+                    {showSummary ? 'Hide Game Summary' : 'Show Game Summary'}
+                  </span>
+                </div>
+                
+                {/* Mini Sticky Summary when collapsed */}
+                {!showSummary && response.summary && (
+                  <span className="text-[10px] text-slate-400 font-mono font-semibold max-w-[180px] truncate text-right">
+                    {response.summary.openingName} | W: {response.summary.whiteAccuracy}% B: {response.summary.blackAccuracy}%
+                  </span>
+                )}
+              </div>
+              
+              {showSummary && (
+                <div className="mt-3">
+                  <SummaryCard response={response} />
+                </div>
+              )}
+            </div>
+
             {response.moves && response.moves.length > 0 ? (
               <MoveList moves={response.moves} />
             ) : (
