@@ -65,8 +65,7 @@ export const getAnalysisStatus = async (req: Request, res: Response, next: NextF
       progress: job.progress,
       currentMove: job.currentMove,
       totalMoves: job.totalMoves,
-      moves: job.moves,
-      summary: job.summary,
+      report: job.report,
       error: job.error,
     })
   } catch (error) {

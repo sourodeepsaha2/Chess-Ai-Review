@@ -118,15 +118,26 @@ messagingService.on('PGN_EXTRACTED', (payload, sender) => {
           console.log(`[Background] Job ${jobId} Status: ${statusResponse.status}, Progress: ${statusResponse.progress}%`)
 
           if (statusResponse.status === 'success') {
+            const report = statusResponse.report;
             messagingService.sendMessage('ANALYSIS_STATUS', {
               status: 'success',
               phaseMessage: 'Finished',
               response: {
                 success: true,
-                message: 'Game uploaded successfully',
-                moveCount: statusResponse.totalMoves,
-                moves: statusResponse.moves || [],
-                summary: statusResponse.summary,
+                message: report
+                  ? `Game reviewed in ${(report.analysisDuration / 1000).toFixed(1)}s`
+                  : 'Game reviewed successfully',
+                moveCount: report?.totalMoves || statusResponse.totalMoves,
+                moves: report?.analyzedMoves?.map((m: any) => ({
+                  ...m,
+                  fenAfterMove: m.fen, // Map player to turn and fen to fenAfterMove for UI backwards compatibility
+                  turn: m.player,
+                })) || [],
+                summary: report ? {
+                  totalMoves: report.totalMoves,
+                  averageCentipawnLoss: report.summary.averageCentipawnLoss,
+                  classificationCounts: report.summary.moveClassificationCounts,
+                } : undefined,
                 timestamp: Date.now()
               },
               timestamp: Date.now()

@@ -43,6 +43,7 @@ export interface AnalysisStatusResponse {
   totalMoves: number;
   moves?: ParsedMove[];
   summary?: GameSummary;
+  report?: any;
   error: string | null;
 }
 

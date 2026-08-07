@@ -5,6 +5,8 @@ import { stockfishUCI } from './stockfish';
 import { calculateCentipawnLoss } from './analysis/centipawnLoss';
 import { classifyMove } from './analysis/classifier';
 import { summaryService, SummaryResult } from './analysis/summary.service';
+import { AnalysisReport } from '../domain/analysis/AnalysisReport';
+import { AnalysisReportMapper } from '../domain/analysis/AnalysisReportMapper';
 
 export interface JobState {
   id: string;
@@ -14,6 +16,10 @@ export interface JobState {
   totalMoves: number;
   moves: any[];
   summary?: SummaryResult;
+  startTime?: number;
+  endTime?: number;
+  durationMs?: number;
+  report?: AnalysisReport;
   error: string | null;
   timestamp: number;
 }
@@ -80,6 +86,7 @@ export class AnalysisQueueService {
   }
 
   private async runJob(job: JobState, pgn: string): Promise<void> {
+    job.startTime = Date.now();
     logger.info(`[AnalysisQueue] Executing analysis job: ${job.id}`);
     
     // 1. Parse PGN using ParserService
@@ -190,8 +197,15 @@ export class AnalysisQueueService {
       currentBestEval = evaluation;
     }
 
+    job.endTime = Date.now();
+    job.durationMs = job.startTime ? job.endTime - job.startTime : 0;
+
     job.moves = analyzedMoves;
     job.summary = summaryService.calculateSummary(analyzedMoves);
+    
+    // Convert internally stored engine states into the domain report
+    job.report = AnalysisReportMapper.toDomain(job, job.durationMs);
+
     job.progress = 100;
     job.status = 'success';
     logger.info(`[AnalysisQueue] Job ${job.id} completed successfully`);
