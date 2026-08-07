@@ -116,14 +116,29 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ response }) => {
         </div>
       </div>
 
-      {/* Future Upgrades: Open Index slots for Opening Detection */}
+      {/* Opening & Theory */}
       <div className="border-t border-slate-850/60 pt-3 flex flex-col space-y-2">
-        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Upcoming AI Features</span>
-        <div className="grid grid-cols-1 gap-2">
-          {/* Opening Detection Placeholder */}
-          <div className="flex items-center justify-between p-2 rounded bg-slate-950/20 border border-dashed border-slate-800 opacity-60">
-            <span className="text-[9px] text-slate-400 font-medium">Opening Theory Detection</span>
-            <span className="text-[9px] text-slate-500 font-mono italic">Future Upgrade</span>
+        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Opening & Theory</span>
+        <div className="grid grid-cols-3 gap-2">
+          {/* Opening Name Card (occupies 2 columns) */}
+          <div className="col-span-2 rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between">
+            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Opening</span>
+            <span className="text-[11px] font-extrabold text-indigo-400 mt-1 truncate">
+              {response.summary?.openingName || 'Unknown Opening'}
+            </span>
+            {response.summary?.openingVariation && (
+              <span className="text-[9px] text-slate-400 italic mt-0.5 truncate">
+                {response.summary.openingVariation}
+              </span>
+            )}
+          </div>
+
+          {/* ECO Code Card (occupies 1 column) */}
+          <div className="rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between items-center text-center">
+            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">ECO</span>
+            <span className="text-xs font-black text-amber-400 mt-1 font-mono">
+              {response.summary?.ecoCode || 'A00'}
+            </span>
           </div>
         </div>
       </div>

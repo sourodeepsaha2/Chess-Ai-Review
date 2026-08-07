@@ -1,4 +1,5 @@
 import { calculateAccuracy } from './accuracy';
+import { openingService } from '../opening/OpeningService';
 
 export interface SummaryResult {
   totalMoves: number;
@@ -15,6 +16,9 @@ export interface SummaryResult {
   };
   whiteAccuracy?: number;
   blackAccuracy?: number;
+  openingName?: string;
+  ecoCode?: string;
+  openingVariation?: string;
   // Open index signature for future extension (e.g. opening theory)
   [key: string]: any;
 }
@@ -45,6 +49,9 @@ export class SummaryService {
         classificationCounts,
         whiteAccuracy: 100,
         blackAccuracy: 100,
+        openingName: "Start Position",
+        ecoCode: "A00",
+        openingVariation: "",
       };
     }
 
@@ -64,16 +71,24 @@ export class SummaryService {
     // Calculate player accuracies based on CPL & Classifications
     const accuracy = calculateAccuracy(moves);
 
+    // Detect opening name and ECO code from SAN sequences
+    const sanMoves = moves.map((m) => m.san || "");
+    const opening = openingService.detectOpening(sanMoves);
+
     return {
       totalMoves,
       averageCentipawnLoss,
       classificationCounts,
       whiteAccuracy: accuracy.whiteAccuracy,
       blackAccuracy: accuracy.blackAccuracy,
+      openingName: opening.opening,
+      ecoCode: opening.eco,
+      openingVariation: opening.variation,
     };
   }
 }
 
 export const summaryService = new SummaryService();
 export default summaryService;
+
 

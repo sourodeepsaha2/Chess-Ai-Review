@@ -14,6 +14,11 @@ export interface GameSummary {
     Mistake: number;
     Blunder: number;
   };
+  whiteAccuracy?: number;
+  blackAccuracy?: number;
+  openingName?: string;
+  ecoCode?: string;
+  openingVariation?: string;
   [key: string]: any;
 }
 

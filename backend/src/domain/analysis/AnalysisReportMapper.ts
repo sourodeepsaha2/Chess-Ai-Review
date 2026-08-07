@@ -44,7 +44,10 @@ export class AnalysisReportMapper {
       job.summary?.classificationCounts || {},
       overallEvaluation,
       job.summary?.whiteAccuracy ?? 100,
-      job.summary?.blackAccuracy ?? 100
+      job.summary?.blackAccuracy ?? 100,
+      job.summary?.openingName || 'Custom/Unknown Opening',
+      job.summary?.ecoCode || 'A00',
+      job.summary?.openingVariation || ''
     );
 
     return new AnalysisReport(
