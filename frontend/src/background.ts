@@ -126,6 +126,7 @@ messagingService.on('PGN_EXTRACTED', (payload, sender) => {
                 message: 'Game uploaded successfully',
                 moveCount: statusResponse.totalMoves,
                 moves: statusResponse.moves || [],
+                summary: statusResponse.summary,
                 timestamp: Date.now()
               },
               timestamp: Date.now()

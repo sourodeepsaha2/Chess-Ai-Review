@@ -4,6 +4,7 @@ import { parserService } from './parser.service';
 import { stockfishUCI } from './stockfish';
 import { calculateCentipawnLoss } from './analysis/centipawnLoss';
 import { classifyMove } from './analysis/classifier';
+import { summaryService, SummaryResult } from './analysis/summary.service';
 
 export interface JobState {
   id: string;
@@ -12,6 +13,7 @@ export interface JobState {
   currentMove: number;
   totalMoves: number;
   moves: any[];
+  summary?: SummaryResult;
   error: string | null;
   timestamp: number;
 }
@@ -189,6 +191,7 @@ export class AnalysisQueueService {
     }
 
     job.moves = analyzedMoves;
+    job.summary = summaryService.calculateSummary(analyzedMoves);
     job.progress = 100;
     job.status = 'success';
     logger.info(`[AnalysisQueue] Job ${job.id} completed successfully`);

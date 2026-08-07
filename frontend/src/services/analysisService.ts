@@ -1,6 +1,22 @@
 import { apiClient } from './apiClient';
 import type { ParsedMove } from '../types/analysis';
 
+export interface GameSummary {
+  totalMoves: number;
+  averageCentipawnLoss: number;
+  classificationCounts: {
+    Brilliant: number;
+    Great: number;
+    Best: number;
+    Excellent: number;
+    Good: number;
+    Inaccuracy: number;
+    Mistake: number;
+    Blunder: number;
+  };
+  [key: string]: any;
+}
+
 export interface AnalysisResponse {
   success: boolean;
   message: string;
@@ -9,6 +25,7 @@ export interface AnalysisResponse {
   pgnProcessed?: boolean;
   moveCount?: number;
   moves?: ParsedMove[];
+  summary?: GameSummary;
 }
 
 export interface AnalysisStartResponse {
@@ -25,6 +42,7 @@ export interface AnalysisStatusResponse {
   currentMove: number;
   totalMoves: number;
   moves?: ParsedMove[];
+  summary?: GameSummary;
   error: string | null;
 }
 

@@ -42,6 +42,7 @@ export interface MessagePayloads {
       timestamp?: number;
       moves?: any[];
       moveCount?: number;
+      summary?: any;
     } | null;
     error?: string | null;
     progress?: number;
