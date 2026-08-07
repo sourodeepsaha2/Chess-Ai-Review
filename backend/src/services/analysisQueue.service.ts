@@ -3,6 +3,7 @@ import logger from '../utils/logger';
 import { parserService } from './parser.service';
 import { stockfishUCI } from './stockfish';
 import { calculateCentipawnLoss } from './analysis/centipawnLoss';
+import { classifyMove } from './analysis/classifier';
 
 export interface JobState {
   id: string;
@@ -150,6 +151,24 @@ export class AnalysisQueueService {
       // Calculate Centipawn Loss comparing pre-move vs post-move evaluations
       const cplResult = calculateCentipawnLoss(currentBestEval, evaluation, move.turn);
 
+      // Determine mate opportunity parameters
+      const MATE_THRESHOLD = 90000;
+      const hadMateOpportunity = Math.abs(currentBestEval) >= MATE_THRESHOLD;
+      const createdMateOpportunity = Math.abs(evaluation) >= MATE_THRESHOLD;
+
+      // Perform move quality classification
+      const classificationResult = classifyMove({
+        centipawnLoss: cplResult.centipawnLoss,
+        bestEvaluation: currentBestEval,
+        playedEvaluation: evaluation,
+        turn: move.turn,
+        playedMoveUci: move.uci,
+        bestMoveUci: bestMove,
+        isForced: move.legalMovesCount === 1,
+        hadMateOpportunity,
+        createdMateOpportunity,
+      });
+
       analyzedMoves.push({
         moveNumber: move.moveNumber,
         san: move.san,
@@ -162,6 +181,7 @@ export class AnalysisQueueService {
         playedEvaluation: cplResult.playedEvaluation,
         bestEvaluation: cplResult.bestEvaluation,
         centipawnLoss: cplResult.centipawnLoss,
+        classification: classificationResult,
       });
 
       // Update currentBestEval to the played evaluation for the next move's baseline
@@ -176,4 +196,5 @@ export class AnalysisQueueService {
 }
 
 export const analysisQueueService = new AnalysisQueueService();
+
 

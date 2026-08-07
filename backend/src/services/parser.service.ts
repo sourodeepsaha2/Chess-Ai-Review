@@ -5,6 +5,8 @@ export interface ParsedMove {
   san: string;
   fenAfterMove: string;
   turn: 'w' | 'b';
+  uci: string;
+  legalMovesCount: number;
 }
 
 export interface ParsedGame {
@@ -38,6 +40,9 @@ export class ParserService {
     for (let i = 0; i < moveHistory.length; i++) {
       const moveObj = moveHistory[i];
 
+      // Measure the number of legal moves available in this position BEFORE moving
+      const legalMovesCount = replayChess.moves().length;
+
       try {
         replayChess.move({
           from: moveObj.from,
@@ -56,6 +61,8 @@ export class ParserService {
         san: moveObj.san,
         fenAfterMove: replayChess.fen(),
         turn: moveObj.color,
+        uci: `${moveObj.from}${moveObj.to}${moveObj.promotion || ''}`,
+        legalMovesCount,
       });
     }
 
@@ -67,3 +74,4 @@ export class ParserService {
 }
 
 export const parserService = new ParserService();
+
