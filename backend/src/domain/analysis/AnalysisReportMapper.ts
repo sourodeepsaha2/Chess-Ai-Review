@@ -29,7 +29,8 @@ export class AnalysisReportMapper {
           classification: move.classification.classification,
           color: move.classification.color,
           icon: move.classification.icon,
-        }
+        },
+        move.tactic
       );
     });
 

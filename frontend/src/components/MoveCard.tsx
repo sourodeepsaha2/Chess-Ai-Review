@@ -37,6 +37,20 @@ export const MoveCard: React.FC<MoveCardProps> = ({ move }) => {
           
           {/* Move Quality Classification Badge */}
           <ClassificationBadge classification={move.classification} />
+
+          {/* Tactical Opportunity Badge */}
+          {move.tactic && (
+            <div className={`px-2 py-0.5 rounded text-[9px] font-bold border flex items-center gap-1 ${
+              move.tactic.severity === 'critical'
+                ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                : move.tactic.severity === 'high'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-450'
+            }`}>
+              <span className="text-[10px]">⚠️</span>
+              <span>{move.tactic.tactic}</span>
+            </div>
+          )}
         </div>
 
         {/* Right side: Turn indicator & evaluation badge */}

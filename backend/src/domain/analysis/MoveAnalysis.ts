@@ -1,5 +1,11 @@
 import { ClassificationResult } from './types';
 
+export interface TacticalOpportunity {
+  moveNumber: number;
+  tactic: 'Missed Win' | 'Missed Mate' | 'Missed Fork' | 'Missed Skewer' | 'Missed Pin';
+  severity: 'medium' | 'high' | 'critical';
+}
+
 export class MoveAnalysis {
   constructor(
     public readonly moveNumber: number,
@@ -10,7 +16,9 @@ export class MoveAnalysis {
     public readonly bestMove: string,
     public readonly principalVariation: string[],
     public readonly centipawnLoss: number,
-    public readonly classification: ClassificationResult
+    public readonly classification: ClassificationResult,
+    public readonly tactic?: TacticalOpportunity
   ) {}
 }
 export default MoveAnalysis;
+

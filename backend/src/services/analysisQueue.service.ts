@@ -7,6 +7,7 @@ import { classifyMove } from './analysis/classifier';
 import { summaryService, SummaryResult } from './analysis/summary.service';
 import { AnalysisReport } from '../domain/analysis/AnalysisReport';
 import { AnalysisReportMapper } from '../domain/analysis/AnalysisReportMapper';
+import { detectTacticalOpportunity } from './analysis/tactics';
 
 export interface JobState {
   id: string;
@@ -126,15 +127,18 @@ export class AnalysisQueueService {
 
     // 2. Perform Stockfish analysis on the initial FEN position
     let initialEval = 0;
+    let initialBestMove = '';
     try {
       const initialAnalysis = await stockfishUCI.analysePosition(initialFen);
       initialEval = initialAnalysis.evaluation;
+      initialBestMove = initialAnalysis.bestMove;
     } catch (err: any) {
       logger.error(`[AnalysisQueue] Failed to analyze initial FEN [${initialFen}] for job ${job.id}: ${err.message}`);
     }
 
     const analyzedMoves: any[] = [];
     let currentBestEval = initialEval;
+    let currentBestMove = initialBestMove;
 
     for (let i = 0; i < total; i++) {
       const move = parsedGame.moves[i];
@@ -178,6 +182,19 @@ export class AnalysisQueueService {
         createdMateOpportunity,
       });
 
+      // Detect tactical opportunities missed by the player
+      const fenBeforeMove = i === 0 ? initialFen : parsedGame.moves[i - 1].fenAfterMove;
+      const tacticalOpportunity = detectTacticalOpportunity(
+        move.moveNumber,
+        fenBeforeMove,
+        move.uci,
+        currentBestMove,
+        evaluation,
+        currentBestEval,
+        move.turn,
+        cplResult.centipawnLoss
+      );
+
       analyzedMoves.push({
         moveNumber: move.moveNumber,
         san: move.san,
@@ -191,10 +208,12 @@ export class AnalysisQueueService {
         bestEvaluation: cplResult.bestEvaluation,
         centipawnLoss: cplResult.centipawnLoss,
         classification: classificationResult,
+        tactic: tacticalOpportunity || undefined,
       });
 
-      // Update currentBestEval to the played evaluation for the next move's baseline
+      // Update currentBestEval and currentBestMove for the next move's baseline
       currentBestEval = evaluation;
+      currentBestMove = bestMove;
     }
 
     job.endTime = Date.now();

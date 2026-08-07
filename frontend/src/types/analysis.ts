@@ -1,3 +1,9 @@
+export interface TacticalOpportunity {
+  moveNumber: number;
+  tactic: 'Missed Win' | 'Missed Mate' | 'Missed Fork' | 'Missed Skewer' | 'Missed Pin';
+  severity: 'medium' | 'high' | 'critical';
+}
+
 export interface ParsedMove {
   moveNumber: number;
   san: string;
@@ -15,6 +21,7 @@ export interface ParsedMove {
     color: string;
     icon: string;
   };
+  tactic?: TacticalOpportunity;
 }
 
 
