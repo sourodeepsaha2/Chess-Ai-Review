@@ -1,8 +1,4 @@
-export interface OpeningDefinition {
-  eco: string;
-  name: string;
-  variation?: string;
-}
+import { OpeningDefinition } from './types';
 
 export const OPENINGS_DB: Record<string, OpeningDefinition> = {
   // e4 openings
@@ -53,4 +49,3 @@ export const OPENINGS_DB: Record<string, OpeningDefinition> = {
   "g3": { eco: "A00", name: "Benko's Opening" },
   "f4": { eco: "A02", name: "Bird's Opening" },
 };
-export default OPENINGS_DB;

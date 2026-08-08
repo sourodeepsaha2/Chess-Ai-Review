@@ -119,28 +119,35 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ response }) => {
       {/* Opening & Theory */}
       <div className="border-t border-slate-850/60 pt-3 flex flex-col space-y-2">
         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Opening & Theory</span>
-        <div className="grid grid-cols-3 gap-2">
-          {/* Opening Name Card (occupies 2 columns) */}
-          <div className="col-span-2 rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between">
-            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Opening</span>
-            <span className="text-[11px] font-extrabold text-indigo-400 mt-1 truncate">
-              {response.summary?.openingName || 'Unknown Opening'}
-            </span>
-            {response.summary?.openingVariation && (
-              <span className="text-[9px] text-slate-400 italic mt-0.5 truncate">
-                {response.summary.openingVariation}
+        {response.summary?.openingName || response.game?.opening?.name ? (
+          <div className="grid grid-cols-3 gap-2">
+            {/* Opening Name Card (occupies 2 columns) */}
+            <div className="col-span-2 rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between">
+              <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Opening</span>
+              <span className="text-[11px] font-extrabold text-indigo-400 mt-1 truncate">
+                {response.summary?.openingName || response.game?.opening?.name}
               </span>
-            )}
-          </div>
+              {(response.summary?.openingVariation || response.game?.opening?.variation) && (
+                <span className="text-[9px] text-slate-400 italic mt-0.5 truncate">
+                  {response.summary?.openingVariation || response.game?.opening?.variation}
+                </span>
+              )}
+            </div>
 
-          {/* ECO Code Card (occupies 1 column) */}
-          <div className="rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between items-center text-center">
-            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">ECO</span>
-            <span className="text-xs font-black text-amber-400 mt-1 font-mono">
-              {response.summary?.ecoCode || 'A00'}
-            </span>
+            {/* ECO Code Card (occupies 1 column) */}
+            <div className="rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between items-center text-center">
+              <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">ECO</span>
+              <span className="text-xs font-black text-amber-400 mt-1 font-mono">
+                {response.summary?.ecoCode || response.game?.opening?.eco || '--'}
+              </span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="rounded-lg border border-slate-850 bg-slate-950/40 p-2.5 flex flex-col justify-between">
+            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Opening</span>
+            <span className="text-[11px] font-extrabold text-indigo-400 mt-1">Unknown</span>
+          </div>
+        )}
       </div>
     </div>
   );

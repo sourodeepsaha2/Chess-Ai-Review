@@ -22,6 +22,16 @@ export interface GameSummary {
   [key: string]: any;
 }
 
+export interface GameOpening {
+  eco: string | null;
+  name: string | null;
+  variation: string | null;
+}
+
+export interface GameInfo {
+  opening: GameOpening;
+}
+
 export interface AnalysisResponse {
   success: boolean;
   message: string;
@@ -31,6 +41,7 @@ export interface AnalysisResponse {
   moveCount?: number;
   moves?: ParsedMove[];
   summary?: GameSummary;
+  game?: GameInfo;
 }
 
 export interface AnalysisStartResponse {

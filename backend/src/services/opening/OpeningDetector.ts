@@ -1,12 +1,7 @@
-import { OPENINGS_DB, OpeningDefinition } from './openingsDb';
+import { OPENINGS_DB } from './OpeningDatabase';
+import { OpeningResult } from './types';
 
-export interface OpeningResult {
-  eco: string;
-  opening: string;
-  variation: string;
-}
-
-export class OpeningService {
+export class OpeningDetector {
   /**
    * Detects the ECO code, opening name, and variation from a list of SAN algebraic moves.
    * Walks the moves list to find the longest matching prefix key inside OPENINGS_DB.
@@ -14,15 +9,15 @@ export class OpeningService {
    * @param moves The algebraic SAN move strings played in the game, e.g. ["e4", "c5", "Nf3"]
    */
   public detectOpening(moves: string[]): OpeningResult {
-    if (!moves || moves.length === 0) {
+    if (!Array.isArray(moves) || moves.length === 0) {
       return {
-        eco: "A00",
-        opening: "Start Position",
-        variation: "",
+        eco: null,
+        opening: null,
+        variation: null,
       };
     }
 
-    let longestMatch: OpeningDefinition | null = null;
+    let longestMatch: any = null;
     let currentSequence = "";
 
     // Limit searching up to the first 16 plies (8 moves) for performance and standard theory bounds
@@ -41,19 +36,19 @@ export class OpeningService {
 
     if (longestMatch) {
       return {
-        eco: longestMatch.eco,
-        opening: longestMatch.name,
-        variation: longestMatch.variation || "",
+        eco: longestMatch.eco || null,
+        opening: longestMatch.name || null,
+        variation: longestMatch.variation || null,
       };
     }
 
     return {
-      eco: "A00",
-      opening: "Custom/Unknown Opening",
-      variation: "",
+      eco: null,
+      opening: null,
+      variation: null,
     };
   }
 }
 
-export const openingService = new OpeningService();
-export default openingService;
+export const openingDetector = new OpeningDetector();
+export default openingDetector;

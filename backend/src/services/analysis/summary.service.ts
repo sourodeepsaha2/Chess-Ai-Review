@@ -1,5 +1,5 @@
 import { calculateAccuracy } from './accuracy';
-import { openingService } from '../opening/OpeningService';
+import { openingDetector } from '../opening/OpeningDetector';
 
 export interface SummaryResult {
   totalMoves: number;
@@ -16,9 +16,9 @@ export interface SummaryResult {
   };
   whiteAccuracy?: number;
   blackAccuracy?: number;
-  openingName?: string;
-  ecoCode?: string;
-  openingVariation?: string;
+  openingName?: string | null;
+  ecoCode?: string | null;
+  openingVariation?: string | null;
   // Open index signature for future extension (e.g. opening theory)
   [key: string]: any;
 }
@@ -49,9 +49,9 @@ export class SummaryService {
         classificationCounts,
         whiteAccuracy: 100,
         blackAccuracy: 100,
-        openingName: "Start Position",
-        ecoCode: "A00",
-        openingVariation: "",
+        openingName: null,
+        ecoCode: null,
+        openingVariation: null,
       };
     }
 
@@ -73,7 +73,7 @@ export class SummaryService {
 
     // Detect opening name and ECO code from SAN sequences
     const sanMoves = moves.map((m) => m.san || "");
-    const opening = openingService.detectOpening(sanMoves);
+    const opening = openingDetector.detectOpening(sanMoves);
 
     return {
       totalMoves,

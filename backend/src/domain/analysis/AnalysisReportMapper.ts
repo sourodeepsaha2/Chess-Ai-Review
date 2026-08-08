@@ -46,16 +46,25 @@ export class AnalysisReportMapper {
       overallEvaluation,
       job.summary?.whiteAccuracy ?? 100,
       job.summary?.blackAccuracy ?? 100,
-      job.summary?.openingName || 'Custom/Unknown Opening',
-      job.summary?.ecoCode || 'A00',
-      job.summary?.openingVariation || ''
+      job.summary?.openingName || null,
+      job.summary?.ecoCode || null,
+      job.summary?.openingVariation || null
     );
+
+    const game = {
+      opening: {
+        eco: job.summary?.ecoCode || null,
+        name: job.summary?.openingName || null,
+        variation: job.summary?.openingVariation || null,
+      },
+    };
 
     return new AnalysisReport(
       totalMoves,
       analyzedMoves,
       durationMs,
-      summary
+      summary,
+      game
     );
   }
 }

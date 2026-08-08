@@ -5,9 +5,9 @@ export class Summary {
     public readonly overallEvaluation: number,
     public readonly whiteAccuracy: number,
     public readonly blackAccuracy: number,
-    public readonly openingName: string,
-    public readonly ecoCode: string,
-    public readonly openingVariation: string
+    public readonly openingName: string | null,
+    public readonly ecoCode: string | null,
+    public readonly openingVariation: string | null
   ) {}
 }
 export default Summary;
