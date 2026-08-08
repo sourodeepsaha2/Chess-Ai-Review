@@ -5,17 +5,22 @@ import { messagingService } from '../services/messagingService';
 
 interface MoveListProps {
   moves: ParsedMove[];
+  selectedIndex: number | null;
+  onSelectMove: (index: number) => void;
 }
 
-export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+export const MoveList: React.FC<MoveListProps> = ({
+  moves,
+  selectedIndex,
+  onSelectMove,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [masterCollapsed, setMasterCollapsed] = useState(true);
   const [collapsedMap, setCollapsedMap] = useState<Record<number, boolean>>({});
   
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Initialize all moves to masterCollapsed state
+  // Initialize all moves to masterCollapsed state when moves load or masterCollapsed toggles
   useEffect(() => {
     const nextMap: Record<number, boolean> = {};
     moves.forEach((_, idx) => {
@@ -49,7 +54,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
     );
   }
 
-  // Filter moves based on search query (by move number or SAN SAN moves)
+  // Filter moves based on search query (by move number or SAN moves)
   const filteredMoves = moves
     .map((move, originalIndex) => ({ move, originalIndex }))
     .filter(({ move }) => {
@@ -62,27 +67,27 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
 
   // Navigation handlers
   const handleFirst = () => {
-    if (moves.length > 0) setSelectedIndex(0);
+    if (moves.length > 0) onSelectMove(0);
   };
 
   const handlePrev = () => {
     if (selectedIndex !== null && selectedIndex > 0) {
-      setSelectedIndex(selectedIndex - 1);
+      onSelectMove(selectedIndex - 1);
     } else if (selectedIndex === null && moves.length > 0) {
-      setSelectedIndex(0);
+      onSelectMove(0);
     }
   };
 
   const handleNext = () => {
     if (selectedIndex !== null && selectedIndex < moves.length - 1) {
-      setSelectedIndex(selectedIndex + 1);
+      onSelectMove(selectedIndex + 1);
     } else if (selectedIndex === null && moves.length > 0) {
-      setSelectedIndex(0);
+      onSelectMove(0);
     }
   };
 
   const handleLast = () => {
-    if (moves.length > 0) setSelectedIndex(moves.length - 1);
+    if (moves.length > 0) onSelectMove(moves.length - 1);
   };
 
   // Toggle individual card collapse
@@ -128,7 +133,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
             <button
               onClick={handleFirst}
               disabled={moves.length === 0}
-              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="First Move"
             >
               ⇤
@@ -136,7 +141,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
             <button
               onClick={handlePrev}
               disabled={selectedIndex === 0 || moves.length === 0}
-              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Previous Move"
             >
               ←
@@ -150,7 +155,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
             <button
               onClick={handleNext}
               disabled={selectedIndex === moves.length - 1 || moves.length === 0}
-              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Next Move"
             >
               →
@@ -158,7 +163,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
             <button
               onClick={handleLast}
               disabled={moves.length === 0}
-              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="p-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Last Move"
             >
               ⇥
@@ -168,7 +173,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
           {/* Master Collapse Toggle */}
           <button
             onClick={() => setMasterCollapsed(!masterCollapsed)}
-            className="px-2.5 py-1 rounded border border-slate-800 bg-slate-900 text-[9px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1"
+            className="px-2.5 py-1 rounded border border-slate-800 bg-slate-900 text-[9px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1 cursor-pointer"
           >
             <span>{masterCollapsed ? 'Expand All' : 'Collapse All'}</span>
           </button>
@@ -186,7 +191,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
 
         <div 
           ref={listRef}
-          className="flex flex-col space-y-2 max-h-[420px] overflow-y-auto pr-1 pr-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent"
+          className="flex flex-col space-y-2 max-h-[420px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent"
         >
           {filteredMoves.map(({ move, originalIndex }) => (
             <div 
@@ -197,7 +202,7 @@ export const MoveList: React.FC<MoveListProps> = ({ moves }) => {
                 move={move}
                 isCollapsed={collapsedMap[originalIndex] ?? masterCollapsed}
                 isSelected={selectedIndex === originalIndex}
-                onSelect={() => setSelectedIndex(originalIndex)}
+                onSelect={() => onSelectMove(originalIndex)}
                 onToggleCollapse={() => toggleCardCollapse(originalIndex)}
               />
             </div>
