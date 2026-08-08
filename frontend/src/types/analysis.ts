@@ -1,7 +1,11 @@
 export interface TacticalOpportunity {
   moveNumber: number;
-  tactic: 'Missed Win' | 'Missed Mate' | 'Missed Fork' | 'Missed Skewer' | 'Missed Pin';
-  severity: 'medium' | 'high' | 'critical';
+  player: 'white' | 'black';
+  type: 'MISSED_MATE' | 'MISSED_WIN' | 'EVAL_SWING';
+  severity: 'high' | 'medium' | 'low';
+  bestMove: string;
+  evaluationBefore: number;
+  evaluationAfter: number;
 }
 
 export interface ParsedMove {

@@ -7,7 +7,7 @@ import { classifyMove } from './analysis/classifier';
 import { summaryService, SummaryResult } from './analysis/summary.service';
 import { AnalysisReport } from '../domain/analysis/AnalysisReport';
 import { AnalysisReportMapper } from '../domain/analysis/AnalysisReportMapper';
-import { detectTacticalOpportunity } from './analysis/tactics';
+import { tacticalDetector } from './tactics/TacticalDetector';
 
 export interface JobState {
   id: string;
@@ -183,16 +183,12 @@ export class AnalysisQueueService {
       });
 
       // Detect tactical opportunities missed by the player
-      const fenBeforeMove = i === 0 ? initialFen : parsedGame.moves[i - 1].fenAfterMove;
-      const tacticalOpportunity = detectTacticalOpportunity(
+      const tacticalOpportunity = tacticalDetector.detectOpportunity(
         move.moveNumber,
-        fenBeforeMove,
-        move.uci,
-        currentBestMove,
-        evaluation,
-        currentBestEval,
         move.turn,
-        cplResult.centipawnLoss
+        currentBestMove,
+        currentBestEval,
+        evaluation
       );
 
       analyzedMoves.push({

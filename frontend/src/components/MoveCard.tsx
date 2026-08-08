@@ -60,8 +60,14 @@ export const MoveCard: React.FC<MoveCardProps> = ({
           <ClassificationBadge classification={move.classification} />
 
           {move.tactic && (
-            <span className="text-[9px] px-1.5 py-0.2 rounded border border-rose-500/20 bg-rose-500/5 text-rose-400 font-bold truncate max-w-[80px]">
-              ⚠️ {move.tactic.tactic}
+            <span className={`text-[9px] px-1.5 py-0.5 rounded border font-bold truncate max-w-[120px] ${
+              move.tactic.type === 'MISSED_MATE'
+                ? 'border-rose-500/20 bg-rose-500/5 text-rose-400'
+                : move.tactic.type === 'MISSED_WIN'
+                ? 'border-amber-500/20 bg-amber-500/5 text-amber-400'
+                : 'border-yellow-500/20 bg-yellow-500/5 text-yellow-450'
+            }`}>
+              {move.tactic.type === 'MISSED_MATE' ? '⚡ Mate' : move.tactic.type === 'MISSED_WIN' ? '⚠ Win' : '⚠ Swing'}
             </span>
           )}
         </div>
@@ -109,14 +115,20 @@ export const MoveCard: React.FC<MoveCardProps> = ({
 
           {move.tactic && (
             <div className={`px-2 py-0.5 rounded text-[9px] font-bold border flex items-center gap-1 ${
-              move.tactic.severity === 'critical'
+              move.tactic.type === 'MISSED_MATE'
                 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                : move.tactic.severity === 'high'
+                : move.tactic.type === 'MISSED_WIN'
                 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
                 : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-450'
             }`}>
-              <span className="text-[10px]">⚠️</span>
-              <span>{move.tactic.tactic}</span>
+              <span>{move.tactic.type === 'MISSED_MATE' ? '⚡' : '⚠'}</span>
+              <span>
+                {move.tactic.type === 'MISSED_MATE' 
+                  ? 'Missed Mate' 
+                  : move.tactic.type === 'MISSED_WIN' 
+                  ? 'Missed Winning Opportunity' 
+                  : 'Missed Opportunity (Eval Swing)'}
+              </span>
             </div>
           )}
         </div>
