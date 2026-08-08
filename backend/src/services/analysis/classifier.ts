@@ -26,21 +26,17 @@ export interface MoveContext {
   createdMateOpportunity: boolean;
 }
 
+import { CLASSIFIER_CONFIG } from '../../config/analysisConfig';
+
 export interface ClassifierConfig {
   cplExcellent: number;
   cplGood: number;
   cplInaccuracy: number;
   cplMistake: number;
-  winningThreshold: number; // score threshold above which a position is considered totally winning (e.g. 400 CP)
+  winningThreshold: number;
 }
 
-export const DEFAULT_CLASSIFIER_THRESHOLDS: ClassifierConfig = {
-  cplExcellent: 25,
-  cplGood: 55,
-  cplInaccuracy: 100,
-  cplMistake: 200,
-  winningThreshold: 450, // +4.50 pawns
-};
+export const DEFAULT_CLASSIFIER_THRESHOLDS: ClassifierConfig = CLASSIFIER_CONFIG;
 
 /**
  * Classifies a played move based on tactical context, CPL, forced status, and mate swings.
